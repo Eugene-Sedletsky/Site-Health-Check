@@ -1,15 +1,20 @@
-# README
-
-## Web Health Check Tool
+# Web Health Check Tool
 
 This Python tool performs vital health checks on a web page, including SSL certificate validation, DNS resolution time, time to first byte, and total download time of the static content. It also provides an option to generate a comprehensive health check report for a specific URL.
+
+## Motivation
+Managing a portfolio of websites under a single umbrella can be challenging, especially when it comes to ensuring their continuous availability and security. Automated SSL certificate renewals can sometimes fail without immediate notice, potentially exposing your sites to security risks and downtime. Existing monitoring tools may not provide the granularity or customization required for specific needs.
+
+This script offers a simple yet effective way to regularly monitor the health of all your websites. By leveraging Python's capabilities, it provides a customizable solution to track important metrics and receive timely alerts, helping you maintain optimal performance and security across all your sites.
+
+
 
 ---
 
 ### Table of Contents
 
-- [README](#readme)
-  - [Web Health Check Tool](#web-health-check-tool)
+- [Web Health Check Tool](#web-health-check-tool)
+  - [Motivation](#motivation)
     - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Installation](#installation)
