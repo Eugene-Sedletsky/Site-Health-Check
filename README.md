@@ -105,6 +105,29 @@ The script will output a detailed health check report for the specified URL, inc
   - Total download time
 
 - **Summary**
+```
+{
+    "url": "https://www.example.com",
+    "domain": "www.example.com",
+    "ssl_check": {
+        "valid": true,
+        "days_until_expiration": 154,
+        "expiry_date": "2025-03-01 23:59:59"
+    },
+    "dns_check": {
+        "resolution_time_ms": 2.5107860565185547,
+        "resolved_ips": [
+            "93.184.215.14"
+        ]
+    },
+    "performance": {
+        "ttfb_ms": 430.05100000000004,
+        "total_download_time_ms": 397.6855278015137
+    },
+    "timestamp": "2024-09-28 21:34:14"
+}
+
+```
 
 ### Customizing Parameters
 
