@@ -1,0 +1,11 @@
+[site_alias_1]
+url = https://example.com
+min_ssl_days = 15
+
+[site_alias_2]
+url = https://google.com
+min_ssl_days = 30
+
+[site_alias_3]
+url = https://nonexistent.example.com
+min_ssl_days = 10

@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "sitehealthcheck"
+version = "1.0.0"
+description = ""
+authors = ["Eugene Sedletsky <eugene.sedletsky@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.32.3"
+dnspython = "^2.6.1"
+configparser = "^7.1.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

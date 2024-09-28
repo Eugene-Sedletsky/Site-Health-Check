@@ -1,0 +1,82 @@
+{
+    "version": 1,
+    "disable_existing_loggers": false,
+    "formatters": {
+        "simple": {
+            "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        },
+        "detailed": {
+            "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s [%(pathname)s:%(lineno)d]"
+        },
+        "json": {
+            "format": "%(message)s"
+        }
+    },
+    "handlers": {
+        "console_debug": {
+            "class": "logging.StreamHandler",
+            "level": "DEBUG",
+            "formatter": "simple",
+            "stream": "ext://sys.stdout"
+        },
+        "info_file_handler": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "level": "INFO",
+            "formatter": "simple",
+            "filename": "logs/info.log",
+            "mode": "a",
+            "maxBytes": 10485760,
+            "backupCount": 5
+        },
+        "error_file_handler": {
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "level": "ERROR",
+            "formatter": "detailed",
+            "filename": "logs/error.log",
+            "when": "midnight",
+            "interval": 1,
+            "backupCount": 7,
+            "encoding": "utf8"
+        },
+        "debug_file_handler": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "level": "DEBUG",
+            "formatter": "simple",
+            "filename": "logs/debug.log",
+            "mode": "a",
+            "maxBytes": 10485760,
+            "backupCount": 5
+        },
+        "health_check_handler": {
+            "class": "logging.FileHandler",
+            "level": "INFO",
+            "formatter": "json",
+            "filename": "logs/health_check.log",
+            "mode": "a",
+            "encoding": "utf8"
+        }
+    },
+    "loggers": {
+        "main-app-logger": {
+            "level": "DEBUG",
+            "handlers": ["console_debug", "info_file_handler", "error_file_handler", "debug_file_handler"],
+            "propagate": false
+        },
+        "check-app-logger": {
+            "level": "DEBUG",
+            "handlers": ["console_debug", "info_file_handler", "error_file_handler", "debug_file_handler"],
+            "propagate": false
+        },
+        "kill-app-logger": {
+            "level": "DEBUG",
+            "handlers": ["console_debug", "info_file_handler", "error_file_handler", "debug_file_handler"],
+            "propagate": false
+        },
+        "healthCheck": {
+            "level": "INFO",
+            "handlers": ["health_check_handler"],
+            "propagate": false
+        }
+    }
+}
+
