@@ -10,6 +10,8 @@ python = "^3.11"
 requests = "^2.32.3"
 dnspython = "^2.6.1"
 configparser = "^7.1.0"
+pyopenssl = "^24.2.1"
+sslyze = "^6.0.0"
 
 
 [build-system]

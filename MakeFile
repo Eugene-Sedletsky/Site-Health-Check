@@ -11,7 +11,11 @@ check_dependencies:
 	poetry install --no-root --dry-run
 
 install:
+	poetry lock --no-update
 	poetry install --no-root
 
 run:
 	poetry run python main.py
+
+run-2:
+	poetry run python .\sslyze_check.py
