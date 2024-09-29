@@ -1,6 +1,8 @@
-# Web Health Check Tool
+<p align="center">
+  <img src="img/logo_mini.png" alt="Project Logo"/>
+</p>
 
-![Logo](img/logo_mini.png)
+# Web Health Check Tool
 
 This Python tool performs vital health checks on a web page, including SSL certificate validation, DNS resolution time, time to first byte, and total download time of the static content. It also provides an option to generate a comprehensive health check report for a specific URL.
 
