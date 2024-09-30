@@ -1,3 +1,5 @@
+[![Lint Status](https://github.com/Eugene-Sedletsky/Site-Health-Check/actions/workflows/pylint.yml/badge.svg)](https://github.com/Eugene-Sedletsky/Site-Health-Check/actions)
+
 <p align="center">
   <img src="img/logo_mini.png" alt="Project Logo"/>
 </p>
