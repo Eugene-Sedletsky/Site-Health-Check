@@ -5,18 +5,17 @@ Test SSL and response
 import ssl
 import socket
 import datetime
-import dns.resolver
-import time
-import requests
-from urllib.parse import urlparse
-import logging.config
+from typing import List
+import sys
 import json
+import time
 import os
 import configparser
-import sys
-from typing import List
 from dataclasses import dataclass
-from Core.Logger import LoggerConfigurator
+from urllib.parse import urlparse
+import dns.resolver
+import requests
+from Core.logger import LoggerConfigurator
 
 
 @dataclass
@@ -80,7 +79,7 @@ def check_ssl_expiry(hostname, min_days=10):
     context = ssl.create_default_context()
     context.check_hostname = True  # Enable hostname verification
     context.verify_mode = ssl.CERT_REQUIRED  # Ensure certificate is verified
-    
+
     try:
         with socket.create_connection((hostname, 443), timeout=5) as sock:
             with context.wrap_socket(sock, server_hostname=hostname) as ssock:
@@ -90,36 +89,40 @@ def check_ssl_expiry(hostname, min_days=10):
                 expire_date_str = cert['notAfter']
                 expire_date = datetime.datetime.strptime(expire_date_str, '%b %d %H:%M:%S %Y %Z')
                 days_left = (expire_date - datetime.datetime.utcnow()).days
-                logger_main.info(f"SSL Certificate is valid for {hostname}: True")
-                logger_main.info(f"Days until expiration: {days_left}")
+                logger_main.info("SSL Certificate is valid for %s: True", hostname)
+                logger_main.info("Days until expiration: %s", days_left)
+
                 if days_left < min_days:
-                    message = (
-                        f"Warning: SSL certificate for {hostname} expires in less than "
-                        f"{min_days} days!"
+                    message = "Warning: SSL certificate for %s expires in less than %s days!"
+
+                    logger_main.warning(
+                        message,
+                        hostname,
+                        min_days,
                     )
-                    logger_main.warning(message)
                 return {
                     'valid': True,
                     'days_until_expiration': days_left,
                     'expiry_date': expire_date.strftime('%Y-%m-%d %H:%M:%S')
                 }
     except ssl.CertificateError as ce:
-        logger_main.error(f"SSL Certificate is valid for {hostname}: False")
-        logger_main.error(f"CertificateError: {ce}")
+        logger_main.error("SSL Certificate is valid for %s: False", hostname)
+        logger_main.error("CertificateError: %s", str(ce))
 
         return {
             'valid': False,
             'error': str(ce)
         }
     except ssl.SSLError as se:
-        logger_main.error(f"SSL Error for {hostname}: {se}")
+        logger_main.error("SSL Error for %s: %s", hostname, str(se))
 
         return {
             'valid': False,
             'error': str(se)
         }
-    except Exception as e:
-        logger_main.error(f"An error occurred while checking SSL for {hostname}: {e}")
+    except Exception as e: # pylint: disable=broad-exception-caught
+        logger_main.error(
+            "An error occurred while checking SSL for %s: %s", hostname, str(e))
 
         return {
             'valid': False,
@@ -168,16 +171,16 @@ def measure_dns_time(domain):
         duration = (end_time - start_time) * 1000
         ips = [rdata.address for rdata in answers]
         logger_main.info(
-            f"DNS resolution time for {domain}: {duration:.2f} ms"
+            "DNS resolution time for %s: %.2f ms", domain, duration
         )
-        logger_main.debug(f"Resolved IPs for {domain}: {ips}")
+        logger_main.debug("Resolved IPs for %s: %s", domain, ips)
 
         return {
             'resolution_time_ms': duration,
             'resolved_ips': ips
         }
-    except Exception as e:
-        logger_main.error(f"Error resolving DNS for {domain}: {e}")
+    except Exception as e: # pylint: disable=broad-exception-caught
+        logger_main.error("Error resolving DNS for %s: %s", domain, str(e))
 
         return {
             'resolution_time_ms': None,
@@ -222,27 +225,36 @@ def measure_time_to_first_byte(url):
         response = session.get(url, stream=True, timeout=10)
         time_to_first_byte = response.elapsed.total_seconds() * 1000
         logger_main.info(
-            f"Time to First Byte for {url}: {time_to_first_byte:.2f} ms"
+            "Time to First Byte for %s: %.2f ms",
+            url,
+            time_to_first_byte,
         )
 
         return time_to_first_byte
     except requests.exceptions.RequestException as e:
-        logger_main.error(f"Error fetching {url}: {e}")
+        logger_main.error(
+            "Error fetching %s: %s",
+            url,
+            str(e)
+        )
         return None
 
 def measure_total_download_time(url):
+    "Total download time for URL"
     start_time = time.time()
     try:
-        response = requests.get(url, timeout=10)
+        _ = requests.get(url, timeout=10)
         end_time = time.time()
         duration = (end_time - start_time) * 1000
         logger_main.info(
-            f"Total download time for {url}: {duration:.2f} ms"
+            "Total download time for %s: %.2f ms",
+            url,
+            duration,
         )
 
         return duration
     except requests.exceptions.RequestException as e:
-        logger_main.error(f"Error downloading {url}: {e}")
+        logger_main.error("Error downloading %s: %s", url, str(e))
 
         return None
 
@@ -300,8 +312,12 @@ def health_check(url, min_ssl_days=10):
     """
     domain = urlparse(url).hostname
 
-    logger_main.info(f"\nHealth Check Report for {url}\n{'-'*40}")
-    
+    logger_main.info(
+        "\nHealth Check Report for %s\n%s",
+        url,
+        '-' * 40
+    )
+
     # Initialize the report dictionary
     report = {
         'url': url,
@@ -311,15 +327,15 @@ def health_check(url, min_ssl_days=10):
         'performance': {},
         'timestamp': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
     }
-    
+
     # SSL Check
     ssl_result = check_ssl_expiry(domain, min_days=min_ssl_days)
     report['ssl_check'] = ssl_result
-    
+
     # DNS Resolution Time
     dns_result = measure_dns_time(domain)
     report['dns_check'] = dns_result
-    
+
     # Time to First Byte
     ttfb = measure_time_to_first_byte(url)
     if ttfb is not None:
@@ -327,7 +343,7 @@ def health_check(url, min_ssl_days=10):
     else:
         report['performance']['ttfb_ms'] = None
         report['performance']['ttfb_error'] = 'Error fetching TTFB'
-    
+
     # Total Download Time
     total_time = measure_total_download_time(url)
     if total_time is not None:
@@ -335,28 +351,28 @@ def health_check(url, min_ssl_days=10):
     else:
         report['performance']['total_download_time_ms'] = None
         report['performance']['download_error'] = 'Error downloading content'
-    
+
     # Summary Logging
-    logger_main.info(f"\nSummary for {url}")
-    logger_main.info(f"SSL Valid: {ssl_result.get('valid')}")
+    logger_main.info("\nSummary for %s", url)
+    logger_main.info("SSL Valid: %s", ssl_result.get('valid'))
     dns_time = dns_result.get('resolution_time_ms')
     if dns_time is not None:
-        logger_main.info(f"DNS Resolution Time: {dns_time:.2f} ms")
+        logger_main.info("DNS Resolution Time: %.2f ms", dns_time)
     else:
         logger_main.error("DNS Resolution Time: Error")
     if ttfb is not None:
-        logger_main.info(f"Time to First Byte: {ttfb:.2f} ms")
+        logger_main.info("Time to First Byte: %.2f ms", ttfb)
     else:
         logger_main.error("Time to First Byte: Error")
     if total_time is not None:
-        logger_main.info(f"Total Download Time: {total_time:.2f} ms")
+        logger_main.info("Total Download Time: %.2f ms", total_time)
     else:
         logger_main.error("Total Download Time: Error")
-    
+
     # Log the JSON report using the healthCheck logger
     json_report = json.dumps(report)
     logger_health.info(json_report)
-    
+
     return report
 
 
@@ -432,7 +448,10 @@ def load_sites_from_config(config_file: str = 'sites.ini') -> List[SiteConfig]:
     """
     config = configparser.ConfigParser()
     if not os.path.exists(config_file):
-        logger_main.error(f"Configuration file {config_file} not found.")
+        logger_main.error(
+            "Configuration file %s not found.",
+            config_file,
+        )
         return []
 
     config.read(config_file)
@@ -443,7 +462,10 @@ def load_sites_from_config(config_file: str = 'sites.ini') -> List[SiteConfig]:
         min_ssl_days_str = config.get(section, 'min_ssl_days', fallback=None)
 
         if url is None:
-            logger_main.warning(f"No URL found in section '{section}'. Skipping.")
+            logger_main.warning(
+                "No URL found in section '%s'. Skipping.",
+                section,
+            )
             continue
 
         url = url.strip()
@@ -453,14 +475,15 @@ def load_sites_from_config(config_file: str = 'sites.ini') -> List[SiteConfig]:
                 min_ssl_days = int(min_ssl_days_str)
             except ValueError:
                 logger_main.warning(
-                    f"Invalid 'min_ssl_days' value in section '{section}'. Defaulting to 10."
+                    "Invalid 'min_ssl_days' value in section '%s'. Defaulting to 10.",
+                    section,
                 )
                 min_ssl_days = 10
         else:
             min_ssl_days = 10  # Default value
 
-        site = SiteConfig(url=url, min_ssl_days=min_ssl_days)
-        sites.append(site)
+        site_config = SiteConfig(url=url, min_ssl_days=min_ssl_days)
+        sites.append(site_config)
 
     return sites
 

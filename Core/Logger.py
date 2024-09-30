@@ -1,18 +1,20 @@
 """
 Logger configurator for handling logger
 """
-
-import os
+# logger core library
 import logging
-from dotenv import load_dotenv
+import logging.config
+
+# Critical Section lock
+from threading import Lock
+
+# Standard library imports
+import os
 import json
 from typing import Optional, List, Set
 from pathlib import Path
-import logging
-import logging.config
-import os
-from threading import Lock
-from typing import Optional
+from dotenv import load_dotenv
+
 
 
 class LoggerConfigurator:
@@ -60,7 +62,7 @@ class LoggerConfigurator:
         with cls._lock:
             if cls._configured:
                 return
-            
+
             # Retrieve log level from environment variable or use default
             log_level_str = os.getenv('LOG_LEVEL')
             if log_level_str:
@@ -70,8 +72,8 @@ class LoggerConfigurator:
 
             if os.path.exists(config_path):
                 try:
-                    with open(config_path, 'r') as f:
-                        config = json.load(f)
+                    config = cls._load_config_file(config_path)
+
                     logging.config.dictConfig(config)
                 except (json.JSONDecodeError, FileNotFoundError, KeyError) as e:
                     logging.basicConfig(level=log_level)
@@ -100,15 +102,20 @@ class LoggerConfigurator:
         """
         if not cls._configured:
             cls._load_env_file()
-            
+
             file_path = cls._get_logger_config_filepath()
-            
+
             cls._create_log_folders(
                 cls._list_log_folders(config_path=file_path)
             )
             cls.configure_logger(config_path=file_path)
 
         return logging.getLogger(channel)
+
+    @classmethod
+    def _load_config_file(cls, config_path: str):
+        with open(config_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
 
     @classmethod
     def _list_log_folders(cls, config_path: str = 'logger-config.json') -> List[str]:
@@ -127,13 +134,12 @@ class LoggerConfigurator:
             return []
 
         try:
-            with open(config_path, 'r') as f:
-                config = json.load(f)
-            
+            config = cls._load_config_file(config_path)
+
             handlers = config.get('handlers', {})
             for _, handler in handlers.items():
                 handler_class = handler.get('class', '')
-                
+
                 # Identify handlers that write to files
                 if handler_class in [
                     'logging.FileHandler',
@@ -147,9 +153,9 @@ class LoggerConfigurator:
                         log_folders.add(str(path.resolve()))
         except (json.JSONDecodeError, FileNotFoundError, KeyError) as e:
             logging.getLogger(__name__).error(
-                f"Failed to parse logging configuration for listing log folders: {e}."
+                "Failed to parse logging configuration for listing log folders: %s.", str(e)
             )
-        
+
         return list(log_folders)
 
     @classmethod
@@ -165,8 +171,8 @@ class LoggerConfigurator:
             if not path.exists():
                 try:
                     path.mkdir(parents=True, exist_ok=True)
-                    logging.getLogger(__name__).info(f"Created log directory: {folder}")
-                except Exception as e:
+                    logging.getLogger(__name__).info("Created log directory: %s", folder)
+                except (PermissionError, OSError, FileExistsError) as e:
                     message = (
                         f"Failed to create log directory {folder}: {e}"
                     )

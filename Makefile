@@ -22,3 +22,6 @@ run-1:
 
 run-2:
 	poetry run python .\sslyze_check.py
+
+lint:
+	poetry run pylint ./

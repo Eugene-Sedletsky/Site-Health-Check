@@ -1,3 +1,4 @@
+"SSL check experiment"
 import socket
 import datetime
 import requests
@@ -21,7 +22,7 @@ def get_certificate(hostname, port=443):
         pem_cert = OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, cert)
         conn.close()
         return pem_cert.decode()
-    except Exception as e:
+    except Exception as e: # pylint: disable=broad-exception-caught
         print(f"Error retrieving certificate: {e}")
         return None
 
@@ -66,7 +67,7 @@ def ssl_certificate_chain_check(hostname, port=443):
             print(f"Certificate {idx + 1}:")
             print(f"  Subject: {subject.CN}")
             print(f"  Issuer: {issuer.CN}\n")
-    except Exception as e:
+    except Exception as e: # pylint: disable=broad-exception-caught
         print(f"Error retrieving certificate chain: {e}")
 
 def domain_name_match(cert_pem, hostname):
@@ -109,14 +110,6 @@ def wildcard_and_san_certificate_validation(cert_pem, hostname):
     else:
         print("Wildcard/SAN certificate does NOT cover the domain!\n")
 
-def ocsp_and_crl_status_check(cert_pem):
-    """
-    Checks if the certificate is revoked using OCSP and CRL.
-    """
-    # This is a placeholder function. Implementing OCSP and CRL checks
-    # requires additional libraries like 'ocspbuilder' and network calls.
-    print("OCSP and CRL status check is not implemented in this script.\n")
-
 def self_signed_certificate_detection(cert_pem):
     """
     Detects if the certificate is self-signed.
@@ -147,31 +140,20 @@ def supported_protocols(hostname, port=443):
             continue
         try:
             context = OpenSSL.SSL.Context(method)
-            conn = OpenSSL.SSL.Connection(context, socket.socket(socket.AF_INET, socket.SOCK_STREAM))
+            conn = OpenSSL.SSL.Connection(
+                context,
+                socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            )
             conn.set_tlsext_host_name(hostname.encode())
             conn.connect((hostname, port))
             conn.do_handshake()
             print(f"{name}: Supported")
             conn.close()
-        except OpenSSL.SSL.Error as e:
+        except OpenSSL.SSL.Error:
             print(f"{name}: Not supported")
-        except Exception as e:
+        except Exception as e: # pylint: disable=broad-exception-caught
             print(f"{name}: Error - {e}")
     print()
-
-def cipher_suite_strength(hostname, port=443):
-    """
-    Verifies that only strong cipher suites are enabled.
-    """
-    # This function requires 'sslscan' or similar tool to check ciphers.
-    print("Cipher suite strength check is not implemented in this script.\n")
-
-def forward_secrecy_check(hostname, port=443):
-    """
-    Ensures the SSL configuration supports Forward Secrecy (FS).
-    """
-    
-    print("Forward security is not implemented in this script.\n")
 
 def hsts_check(hostname):
     """
@@ -183,10 +165,11 @@ def hsts_check(hostname):
             print("HSTS is enabled.\n")
         else:
             print("HSTS is not enabled.\n")
-    except Exception as e:
+    except Exception as e: # pylint: disable=broad-exception-caught
         print(f"Error checking HSTS: {e}\n")
 
 def main():
+    "Usage example"
     hostname = input("Enter the domain name (e.g., example.com): ").strip()
 
     cert_pem = get_certificate(hostname)
