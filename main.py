@@ -9,7 +9,6 @@ import dns.resolver
 import time
 import requests
 from urllib.parse import urlparse
-import logging
 import logging.config
 import json
 import os
@@ -17,6 +16,7 @@ import configparser
 import sys
 from typing import List
 from dataclasses import dataclass
+from Core.Logger import LoggerConfigurator
 
 
 @dataclass
@@ -25,60 +25,9 @@ class SiteConfig:
     url: str
     min_ssl_days: int = 10
 
-def ensure_log_directory():
-    "Handle log directory"
-    log_dir = 'logs'
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-
-def configure_logger(default_path='logger-config.json', default_level=logging.INFO):
-    """
-    Configures the logging system for the application using a JSON configuration file.
-
-    This function attempts to load logging configurations from a JSON file specified by `default_path`.
-    If the file exists, it uses the configurations defined in the file to set up the logging system.
-    If the file does not exist, it falls back to a basic logging configuration with the specified
-    `default_level`.
-
-    Args:
-        default_path (str): The file path to the JSON logging configuration file.
-            Defaults to 'logger-config.json'.
-        default_level (int): The default logging level to use if the configuration file is not found.
-            Defaults to `logging.INFO`.
-
-    Returns:
-        None
-
-    Side Effects:
-        - Configures the logging system for the application.
-        - Sets up loggers, handlers, formatters, and logging levels as defined in the configuration file
-          or by the default basic configuration.
-
-    Notes:
-        - The function uses `logging.config.dictConfig()` to configure logging when the configuration
-          file is present and successfully loaded.
-        - If the configuration file is missing or cannot be loaded, it uses `logging.basicConfig()`
-          to set up a basic logging configuration.
-        - The JSON configuration file should follow the structure expected by `logging.config.dictConfig()`.
-
-    Example:
-        >>> configure_logger()
-        # Configures logging using 'logger-config.json' or sets up basic logging with INFO level.
-
-        >>> configure_logger(default_path='custom_logger.json', default_level=logging.DEBUG)
-        # Configures logging using 'custom_logger.json' or sets up basic logging with DEBUG level.
-
-    """
-    if os.path.exists(default_path):
-        with open(default_path, 'r') as f:
-            config = json.load(f)
-        logging.config.dictConfig(config)
-    else:
-        logging.basicConfig(level=default_level)
-
 # Get the loggers
-logger_main = logging.getLogger('main-app-logger')
-logger_health = logging.getLogger('healthCheck')
+logger_main = LoggerConfigurator.get_logger('main-app-logger')
+logger_health = LoggerConfigurator.get_logger('healthCheck')
 
 def check_ssl_expiry(hostname, min_days=10):
     """
@@ -482,8 +431,7 @@ def load_sites_from_config(config_file: str = 'sites.ini') -> List[SiteConfig]:
 
 if __name__ == "__main__":
     # Configure logging
-    ensure_log_directory()
-    configure_logger()
+    # configure_logger()
 
     # Load URLs from configuration file
     sites_to_check = load_sites_from_config()

@@ -77,6 +77,7 @@ def domain_name_match(cert_pem, hostname):
     common_name = cert.subject.get_attributes_for_oid(x509.NameOID.COMMON_NAME)[0].value
     san = cert.extensions.get_extension_for_oid(ExtensionOID.SUBJECT_ALTERNATIVE_NAME).value
     san_list = san.get_values_for_type(x509.DNSName)
+
     print(f"Common Name (CN): {common_name}")
     print(f"Subject Alternative Names (SANs): {san_list}")
     if hostname == common_name or hostname in san_list:
@@ -96,10 +97,13 @@ def wildcard_and_san_certificate_validation(cert_pem, hostname):
         if name.startswith("*"):
             if hostname.endswith(name.strip("*")):
                 match = True
+
                 break
         elif name == hostname:
             match = True
+
             break
+
     if match:
         print("Wildcard/SAN certificate covers the domain.\n")
     else:

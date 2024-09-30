@@ -2,23 +2,39 @@
   <img src="img/logo_mini.png" alt="Project Logo"/>
 </p>
 
-# Web Health Check Tool
+# Web site Health Check Tool
 
-This Python tool performs vital health checks on a web page, including SSL certificate validation, DNS resolution time, time to first byte, and total download time of the static content. It also provides an option to generate a comprehensive health check report for a specific URL.
+This Python tool performs a few health checks on a web page, including:
+- SSL certificate validation,
+- DNS resolution time,
+- time to first byte,
+- and total download time of the static content.
+
+It also generates a health check report for a specific URL.
 
 
 ## Motivation
-Managing a portfolio of websites under a single umbrella can be challenging, especially when it comes to ensuring their continuous availability and security. Automated SSL certificate renewals can sometimes fail without immediate notice, potentially exposing your sites to security risks and downtime. Existing monitoring tools may not provide the granularity or customization required for specific needs.
 
-This script offers a simple yet effective way to regularly monitor the health of all your websites. By leveraging Python's capabilities, it provides a customizable solution to track important metrics and receive timely alerts, helping you maintain optimal performance and security across all your sites.
+A portfolio of websites needed to be tested to ensure their continuous availability and security.
+Automated SSL certificate renewals can sometimes fail without immediate notice, potentially
+exposing your sites to security risks, downtime, and reputation breaches. While few outstanding
+SSL testing tools are available, I was looking for something more crafted for my simple needs.
+
+ 1. Is SSL valid
+ 2. EOL for SSL certificate
+ 3. Measure the time for DNS to respond
+ 4. Measure time for server to respond after request been sent (time to first byte)
+ 5. Measure the time for whole static content to be served (ignoring images, css, js, images)
+ 6. Preferably multiple ways of delivering test results (like ELK, DataDog, Slack, telegram, or anything else); while I like those tools, I don't want to change them every time I need to pass messages to different clients.
 
 
+By all means, this tool is not intended to be a replacement for well-known SSL validators that are available. 
 
 ---
 
 ### Table of Contents
 
-- [Web Health Check Tool](#web-health-check-tool)
+- [Web site Health Check Tool](#web-site-health-check-tool)
   - [Motivation](#motivation)
     - [Table of Contents](#table-of-contents)
   - [Features](#features)
@@ -54,6 +70,8 @@ This script offers a simple yet effective way to regularly monitor the health of
 
 - **Health Check Report**
   - Generates a detailed report for a specific URL, summarizing all the above metrics.
+
+- **Configurable output receivers**
 
 ## Installation
 

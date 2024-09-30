@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sitehealthcheck"
-version = "1.0.0"
+version = "1.0.1"
 description = ""
 authors = ["Eugene Sedletsky <eugene.sedletsky@gmail.com>"]
 readme = "README.md"
@@ -12,6 +12,7 @@ dnspython = "^2.6.1"
 configparser = "^7.1.0"
 pyopenssl = "^24.2.1"
 sslyze = "^6.0.0"
+python-dotenv = "^1.0.1"
 
 
 [build-system]

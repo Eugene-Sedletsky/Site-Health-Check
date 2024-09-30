@@ -17,5 +17,8 @@ install:
 run:
 	poetry run python main.py
 
+run-1:
+	poetry run python .\ssl_check.py
+
 run-2:
 	poetry run python .\sslyze_check.py
