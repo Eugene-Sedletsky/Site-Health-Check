@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from urllib.parse import urlparse
 import dns.resolver
 import requests
-from Core.logger import LoggerConfigurator
+from core.logger import LoggerConfigurator
 
 
 @dataclass
