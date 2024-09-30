@@ -32,11 +32,18 @@ By all means, this tool is not intended to be a replacement for well-known SSL v
 
 ---
 
-### Table of Contents
+## Precautions
+
+This package is currently in its early development stages. At this time, a few changes may be made directly to the master branch without pull requests.
+
+Please await unt updates.
+
+## Table of Contents
 
 - [Web site Health Check Tool](#web-site-health-check-tool)
   - [Motivation](#motivation)
-    - [Table of Contents](#table-of-contents)
+  - [Precautions](#precautions)
+  - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Installation](#installation)
     - [Prerequisites](#prerequisites)
