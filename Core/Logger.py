@@ -75,9 +75,11 @@ class LoggerConfigurator:
                     logging.config.dictConfig(config)
                 except (json.JSONDecodeError, FileNotFoundError, KeyError) as e:
                     logging.basicConfig(level=log_level)
-                    logging.getLogger(__name__).error(
-                        f"Failed to load logging configuration from {config_path}: {e}. Using basicConfig."
+                    message = (
+                        "Failed to load logging configuration from "
+                        f"{config_path}: {e}. Using basicConfig."
                     )
+                    logging.getLogger(__name__).error(message)
             else:
                 logging.basicConfig(level=log_level)
 
@@ -165,4 +167,7 @@ class LoggerConfigurator:
                     path.mkdir(parents=True, exist_ok=True)
                     logging.getLogger(__name__).info(f"Created log directory: {folder}")
                 except Exception as e:
-                    logging.getLogger(__name__).error(f"Failed to create log directory {folder}: {e}")
+                    message = (
+                        f"Failed to create log directory {folder}: {e}"
+                    )
+                    logging.getLogger(__name__).error(message)

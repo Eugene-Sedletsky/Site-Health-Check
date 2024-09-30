@@ -31,28 +31,34 @@ logger_health = LoggerConfigurator.get_logger('healthCheck')
 
 def check_ssl_expiry(hostname, min_days=10):
     """
-    Checks the SSL certificate expiry date for the specified hostname and determines if it is valid and
-    not expiring within a given number of days.
+    Checks the SSL certificate expiry date for the specified hostname and determines if it is valid
+    and not expiring within a given number of days.
 
     Args:
         hostname (str): The hostname or domain to check the SSL certificate for.
-        min_days (int, optional): The minimum number of days the SSL certificate should remain valid.
+        min_days (int, optional): The minimum number of days the SSL certificate should remain
+        valid.
             Defaults to 10.
 
     Returns:
-        Dict[str, Any]: A dictionary containing the results of the SSL certificate check with the following keys:
-            - 'valid' (bool): Indicates whether the SSL certificate is valid and matches the hostname.
-            - 'days_until_expiration' (int, optional): Number of days remaining until the SSL certificate expires.
-                Present only if the certificate is valid.
-            - 'expiry_date' (str, optional): The expiration date of the SSL certificate in 'YYYY-MM-DD HH:MM:SS' format.
-                Present only if the certificate is valid.
+        Dict[str, Any]: A dictionary containing the results of the SSL certificate check with the
+        following keys:
+            - 'valid' (bool): Indicates whether the SSL certificate is valid and matches the
+                hostname.
+            - 'days_until_expiration' (int, optional): Number of days remaining until the SSL
+                certificate expires. Present only if the certificate is valid.
+            - 'expiry_date' (str, optional): The expiration date of the SSL certificate in
+                'YYYY-MM-DD HH:MM:SS' format. Present only if the certificate is valid.
             - 'error' (str, optional): An error message if the SSL check failed.
 
     Notes:
-        - The function creates an SSL context with hostname verification enabled and certificate verification mode set to required.
+        - The function creates an SSL context with hostname verification enabled and certificate
+            verification mode set to required.
         - It attempts to establish an SSL connection to the specified hostname on port 443.
-        - If the SSL certificate is valid and not expiring within the specified `min_days`, it returns details about the certificate.
-        - If the certificate is invalid, expired, or an error occurs during the connection, the function logs the error and returns 'valid' as False.
+        - If the SSL certificate is valid and not expiring within the specified `min_days`,
+            it returns details about the certificate.
+        - If the certificate is invalid, expired, or an error occurs during the connection,
+        the function logs the error and returns 'valid' as False.
 
     Logging:
         - Logs informational messages about the SSL certificate validity and days until expiration.
@@ -62,9 +68,14 @@ def check_ssl_expiry(hostname, min_days=10):
     Example:
         >>> ssl_result = check_ssl_expiry('example.com', min_days=15)
         >>> if ssl_result['valid']:
-        ...     print(f"SSL certificate is valid, expires in {ssl_result['days_until_expiration']} days.")
+        ...     due_date = ssl_result['days_until_expiration']
+        ...     print(
+        ...        f"SSL certificate is valid, expires in {due_date} days."
+        ...     )
         ... else:
-        ...     print(f"SSL certificate check failed: {ssl_result.get('error', 'Unknown error')}")
+        ...     print(
+        ...        f"SSL certificate check failed: {ssl_result.get('error', 'Unknown error')}"
+        ...     )
     """
     context = ssl.create_default_context()
     context.check_hostname = True  # Enable hostname verification
@@ -82,9 +93,11 @@ def check_ssl_expiry(hostname, min_days=10):
                 logger_main.info(f"SSL Certificate is valid for {hostname}: True")
                 logger_main.info(f"Days until expiration: {days_left}")
                 if days_left < min_days:
-                    logger_main.warning(
-                        f"Warning: SSL certificate for {hostname} expires in less than {min_days} days!"
+                    message = (
+                        f"Warning: SSL certificate for {hostname} expires in less than "
+                        f"{min_days} days!"
                     )
+                    logger_main.warning(message)
                 return {
                     'valid': True,
                     'days_until_expiration': days_left,
@@ -122,15 +135,18 @@ def measure_dns_time(domain):
 
     Returns:
         Dict[str, Any]: A dictionary containing the DNS resolution results with the following keys:
-            - 'resolution_time_ms' (float, optional): The time taken to resolve the domain in milliseconds.
+            - 'resolution_time_ms' (float, optional): The time taken to resolve the domain
+                in milliseconds.
             - 'resolved_ips' (List[str]): A list of IP addresses that the domain resolves to.
             - 'error' (str, optional): An error message if DNS resolution failed.
 
     Notes:
         - The function uses the `dns.resolver` module to perform DNS resolution.
-        - It measures the time taken from the initiation of the DNS query to receiving the response.
-        - If the resolution is successful, it returns the resolution time and the list of resolved IP addresses.
-        - In case of an exception (e.g., timeout, NXDOMAIN), it logs the error and returns an 'error' key in the result.
+        - It measures the time taken from the initiation of the DNS query to receiving the response
+        - If the resolution is successful, it returns the resolution time and the list of resolved
+            IP addresses.
+        - In case of an exception (e.g., timeout, NXDOMAIN), it logs the error and returns
+            an 'error' key in the result.
 
     Logging:
         - Logs informational messages about the DNS resolution time and resolved IPs.
@@ -181,8 +197,10 @@ def measure_time_to_first_byte(url):
 
     Notes:
         - The function sends an HTTP GET request to the specified URL using the `requests` library.
-        - It measures the time elapsed from the request initiation until the first byte of the response is received.
-        - If the request encounters an exception (e.g., timeout, connection error), the function logs the error and returns None.
+        - It measures the time elapsed from the request initiation until the first byte of
+            the response is received.
+        - If the request encounters an exception (e.g., timeout, connection error), the function
+            logs the error and returns None.
         - The function utilizes a session with a retry strategy to handle transient network issues.
 
     Logging:
@@ -232,36 +250,47 @@ def measure_total_download_time(url):
 def health_check(url, min_ssl_days=10):
     """
     Performs a comprehensive health check on the given URL, including SSL certificate validation,
-    DNS resolution time measurement, Time to First Byte (TTFB), and total download time of the webpage.
+    DNS resolution time measurement, Time to First Byte (TTFB), and total download time of
+    the webpage.
 
     Args:
         url (str): The URL of the website to perform the health check on.
-        min_ssl_days (int, optional): The minimum number of days the SSL certificate should be valid.
-            Defaults to 10.
+        min_ssl_days (int, optional): The minimum number of days the SSL certificate should
+        be valid. Defaults to 10.
 
     Returns:
-        Dict[str, Any]: A dictionary containing the results of the health check with the following keys:
+        Dict[str, Any]: A dictionary containing the results of the health check with
+        the following keys:
             - 'url' (str): The URL that was checked.
             - 'domain' (str): The domain extracted from the URL.
             - 'ssl_check' (Dict[str, Any]): Results of the SSL certificate check, containing:
                 - 'valid' (bool): Whether the SSL certificate is valid and matches the hostname.
-                - 'days_until_expiration' (int, optional): Days remaining until the SSL certificate expires.
-                - 'expiry_date' (str, optional): The expiration date of the SSL certificate in 'YYYY-MM-DD HH:MM:SS' format.
+                - 'days_until_expiration' (int, optional): Days remaining until the
+                    SSL certificate expires.
+                - 'expiry_date' (str, optional): The expiration date of the SSL certificate
+                    in 'YYYY-MM-DD HH:MM:SS' format.
                 - 'error' (str, optional): An error message if the SSL check failed.
-            - 'dns_check' (Dict[str, Any]): Results of the DNS resolution time measurement, containing:
-                - 'resolution_time_ms' (float, optional): Time taken to resolve the domain, in milliseconds.
+            - 'dns_check' (Dict[str, Any]): Results of the DNS resolution time measurement,
+                containing:
+                - 'resolution_time_ms' (float, optional): Time taken to resolve the domain,
+                    in milliseconds.
                 - 'resolved_ips' (List[str]): A list of IP addresses resolved for the domain.
                 - 'error' (str, optional): An error message if DNS resolution failed.
             - 'performance' (Dict[str, Any]): Performance metrics of the website, containing:
                 - 'ttfb_ms' (float, optional): Time to First Byte, in milliseconds.
-                - 'total_download_time_ms' (float, optional): Total time to download the webpage content, in milliseconds.
+                - 'total_download_time_ms' (float, optional): Total time to download the webpage
+                    content, in milliseconds.
                 - 'ttfb_error' (str, optional): An error message if TTFB measurement failed.
-                - 'download_error' (str, optional): An error message if download time measurement failed.
-            - 'timestamp' (str): The UTC timestamp when the health check was performed, in 'YYYY-MM-DD HH:MM:SS' format.
+                - 'download_error' (str, optional): An error message if download time measurement
+                    failed.
+            - 'timestamp' (str): The UTC timestamp when the health check was performed,
+            in 'YYYY-MM-DD HH:MM:SS' format.
 
     Notes:
-        - The function handles exceptions internally and records any errors in the corresponding sections of the return dictionary.
-        - Logging is performed using the configured logger instances for informational and error messages.
+        - The function handles exceptions internally and records any errors in the corresponding
+            sections of the return dictionary.
+        - Logging is performed using the configured logger instances for informational
+            and error messages.
         - The function integrates with a logging system to output JSON reports if configured.
 
     Example:
@@ -333,33 +362,38 @@ def health_check(url, min_ssl_days=10):
 
 def load_sites_from_config(config_file: str = 'sites.ini') -> List[SiteConfig]:
     """
-    Loads site configurations from an INI-style configuration file and returns a list of `SiteConfig` instances.
+    Loads site configurations from an INI-style configuration file and returns a list
+    of `SiteConfig` instances.
 
-    This function reads a configuration file specified by `config_file`, parses the sections representing
-    individual site configurations, and creates `SiteConfig` data class instances for each site.
-    Each section in the configuration file should represent a site, containing at least a `url` key.
-    Optional keys such as `min_ssl_days` can also be included to override default values.
+    This function reads a configuration file specified by `config_file`, parses the
+    sections representing individual site configurations, and creates `SiteConfig` data
+    class instances for each site. Each section in the configuration file should represent
+    a site, containing at least a `url` key. Optional keys such as `min_ssl_days` can also
+    be included to override default values.
 
     Args:
         config_file (str): The path to the configuration file containing site information.
             Defaults to 'sites.ini'.
 
     Returns:
-        List[SiteConfig]: A list of `SiteConfig` instances, each representing a site's configuration.
+        List[SiteConfig]: A list of `SiteConfig` instances, each representing a site's
+        configuration.
 
     Raises:
         FileNotFoundError: If the specified configuration file does not exist.
 
     Side Effects:
-        - Logs errors if the configuration file is missing or if required keys are missing in a section.
+        - Logs errors if the configuration file is missing or if required keys are missing
+            in a section.
         - Logs warnings for invalid values that are corrected to defaults.
 
     Notes:
         - The configuration file should be in INI format, where each section represents a site with
-          configuration keys such as `url` and `min_ssl_days`.
+            configuration keys such as `url` and `min_ssl_days`.
         - The `url` key is required in each section. If a section lacks a `url`, it will be skipped.
         - The `min_ssl_days` key is optional. If not provided or invalid, it defaults to 10.
-        - Additional optional keys can be added to the `SiteConfig` data class and parsed accordingly.
+        - Additional optional keys can be added to the `SiteConfig` data class and parsed
+            accordingly.
 
     Example Configuration File (`sites.ini`):
         [site1]
@@ -385,13 +419,15 @@ def load_sites_from_config(config_file: str = 'sites.ini') -> List[SiteConfig]:
 
     Implementation Details:
         - Uses Python's `configparser` module to read and parse the INI file.
-        - Creates instances of the `SiteConfig` data class for type safety and convenient attribute access.
+        - Creates instances of the `SiteConfig` data class for type safety and convenient attribute
+            access.
         - Strips any leading or trailing whitespace from the `url` value.
         - Converts the `min_ssl_days` value to an integer, defaulting to 10 if conversion fails.
 
     Dependencies:
         - Requires the `configparser` module from the standard library.
-        - Depends on the `SiteConfig` data class being defined, typically using the `@dataclass` decorator.
+        - Depends on the `SiteConfig` data class being defined, typically using the `@dataclass`
+            decorator.
 
     """
     config = configparser.ConfigParser()
