@@ -1,0 +1,48 @@
+name: Pylint
+
+on: [push]
+
+jobs:
+  build:
+    name: Run Linting
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+    steps:
+    # Checkout the repository
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    # Step 3: Cache Poetry dependencies
+    - name: Cache Poetry dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/pypoetry
+          ~/.virtualenvs
+        key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-poetry-
+
+    # Install Poetry
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+
+    # Install dependencies using Poetry
+    - name: Install dependencies
+      run: |
+        poetry install
+
+    # Set PYTHONPATH to include the project directory
+    - name: Set PYTHONPATH
+      run: |
+        echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
+        
+    - name: Analysing the code with pylint
+      run: |
+        poetry run pylint ./
