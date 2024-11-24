@@ -20,8 +20,8 @@ run:
 run-1:
 	poetry run python .\ssl_check.py
 
-run-2:
-	poetry run python .\sslyze_check.py
+#run-2:
+#	poetry run python .\sslyze_check.py
 
 lint:
 	poetry run pylint ./

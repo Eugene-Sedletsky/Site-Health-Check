@@ -15,15 +15,16 @@ from dataclasses import dataclass
 from urllib.parse import urlparse
 import dns.resolver
 import requests
-from core.logger import LoggerConfigurator
 import whois
+from core.logger import LoggerConfigurator
 
 
 class DateTimeEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, datetime.datetime):  # Correct: datetime.datetime is a type
-            return obj.isoformat()
-        return super().default(obj)
+    """Handle DateTime during JSON dump"""
+    def default(self, o):
+        if isinstance(o, datetime.datetime):  # Correct: datetime.datetime is a type
+            return o.isoformat()
+        return super().default(o)
 
 @dataclass
 class SiteConfig:
@@ -265,7 +266,7 @@ def measure_total_download_time(url):
 
         return None
 
-def health_check(url, dns_record={}, min_ssl_days=10):
+def health_check(url, dns_record, min_ssl_days=10):
     """
     Performs a comprehensive health check on the given URL, including SSL certificate validation,
     DNS resolution time measurement, Time to First Byte (TTFB), and total download time of
@@ -527,14 +528,15 @@ def extract_dns_info(url: str) -> dict[str, List[str]]:
 
 def list_all_dns_records(domain: str) -> dict[str, List[str]]:
     """
-    Lists all DNS records (A, MX, NS, CNAME, TXT, and other available records) associated with the domain.
+    Lists all DNS records (A, MX, NS, CNAME, TXT, and other available records) associated with
+    the domain.
 
     Args:
         domain (str): The domain to query DNS records for.
 
     Returns:
-        Dict[str, List[str]]: A dictionary where the keys are the DNS record types (e.g., 'A', 'MX', 'TXT')
-                              and the values are lists of corresponding records.
+        Dict[str, List[str]]: A dictionary where the keys are the DNS record types (e.g., 'A', 'MX',
+        'TXT') and the values are lists of corresponding records.
     """
     dns_records = {}
 
@@ -543,28 +545,28 @@ def list_all_dns_records(domain: str) -> dict[str, List[str]]:
         try:
             # Get the name of the record type
             record_type_name = dns.rdatatype.to_text(record_type)
-            
+
             # Try resolving this record type for the domain
             answers = dns.resolver.resolve(domain, record_type_name)
             dns_records[record_type_name] = [str(rdata) for rdata in answers]
-        
+
         except dns.resolver.NoAnswer:
             # No records of this type found
             dns_records[record_type_name] = []
-        
+
         except dns.resolver.NXDOMAIN:
             # Domain does not exist
             return {'error': f"Domain {domain} does not exist"}
-        
+
         except dns.resolver.NoMetaqueries:
             # Some record types like ANY, AXFR, etc., can't be queried.
             dns_records[record_type_name] = ["Not supported for querying"]
-        
+
         except dns.exception.Timeout:
             # Timeout during the DNS query
             dns_records[record_type_name] = ["Timeout querying this record type"]
-        
-        except Exception as e:
+
+        except Exception as e: # pylint: disable=W0718
             # Catch all other errors, including unsupported record types
             dns_records[record_type_name] = [f"Error: {str(e)}"]
 
@@ -588,7 +590,7 @@ def get_domain_registration_info(domain: str) -> dict[str, any]:
     """
     try:
         w = whois.whois(domain)
-        
+
         # Extract the relevant information
         registration_info = {
             'domain': w.domain_name,
@@ -609,7 +611,7 @@ def get_domain_registration_info(domain: str) -> dict[str, any]:
 
         return registration_info
 
-    except Exception as e:
+    except Exception as e: # pylint: disable=W0718
         # Handle errors such as domain not found or whois query issues
         return {
             'domain': domain,
@@ -638,12 +640,12 @@ if __name__ == "__main__":
     for site in sites_to_check:
         logger_main.info("\nProcessing URL %s", site.url)
         dns_info = extract_dns_info(site.url)
-        domain = dns_info['domain']
-        dns_records = list_all_dns_records(domain)
-        domain_registration_info = get_domain_registration_info(domain)
+        domain_name_response = dns_info['domain']
+        dns_records_response = list_all_dns_records(domain_name_response)
+        domain_registration_info = get_domain_registration_info(domain_name_response)
         dns_info.update(
             {
-                'dns_records' : dns_records,
+                'dns_records' : dns_records_response,
                 'domain_registration_info': domain_registration_info
             }
         )
