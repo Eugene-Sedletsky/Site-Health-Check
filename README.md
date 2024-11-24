@@ -7,10 +7,10 @@
 # Web site Health Check Tool
 
 This Python tool performs a few health checks on a web page, including:
-- SSL certificate validation,
-- DNS resolution time,
-- time to first byte,
-- and total download time of the static content.
+- **SSL certificate validation**,
+- **DNS resolution time**,
+- **time to first byte**,
+- **and total download time of the static content**.
 
 It also generates a health check report for a specific URL.
 
@@ -20,17 +20,17 @@ It also generates a health check report for a specific URL.
 A portfolio of websites needed to be tested to ensure their continuous availability and security.
 Automated SSL certificate renewals can sometimes fail without immediate notice, potentially
 exposing your sites to security risks, downtime, and reputation breaches. While few outstanding
-SSL testing tools are available, I was looking for something more crafted for my simple needs.
+SSL testing tools are available; I wanted something more crafted for my simple needs.
 
  1. Is SSL valid
  2. EOL for SSL certificate
  3. Measure the time for DNS to respond
- 4. Measure time for server to respond after request been sent (time to first byte)
- 5. Measure the time for whole static content to be served (ignoring images, css, js, images)
- 6. Preferably multiple ways of delivering test results (like ELK, DataDog, Slack, telegram, or anything else); while I like those tools, I don't want to change them every time I need to pass messages to different clients.
+ 4. Measure the time for the server to respond after the request has been sent (time to the first byte)
+ 5. Measure the time for whole static content to be served (ignoring images, CSS, JS, and images)
+ 6. Preferably multiple ways of delivering test results (like ELK, DataDog, Slack, telegram, or anything else); while I like those tools, I want to keep them the same whenever I need to pass messages to different clients.
 
 
-By all means, this tool is not intended to be a replacement for well-known SSL validators that are available. 
+By all means, this tool is intended to be something other than a replacement for available well-known SSL validators. 
 
 ---
 
@@ -38,7 +38,7 @@ By all means, this tool is not intended to be a replacement for well-known SSL v
 
 This package is currently in its early development stages. At this time, a few changes may be made directly to the master branch without pull requests.
 
-Please await unt updates.
+Please wait for further updates.
 
 ## Table of Contents
 
