@@ -19,6 +19,12 @@ from core.logger import LoggerConfigurator
 import whois
 
 
+class DateTimeEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime.datetime):  # Correct: datetime.datetime is a type
+            return obj.isoformat()
+        return super().default(obj)
+
 @dataclass
 class SiteConfig:
     "Site configuration data class"
@@ -259,7 +265,7 @@ def measure_total_download_time(url):
 
         return None
 
-def health_check(url, min_ssl_days=10):
+def health_check(url, dns_record={}, min_ssl_days=10):
     """
     Performs a comprehensive health check on the given URL, including SSL certificate validation,
     DNS resolution time measurement, Time to First Byte (TTFB), and total download time of
@@ -325,7 +331,8 @@ def health_check(url, min_ssl_days=10):
         'ssl_check': {},
         'dns_check': {},
         'performance': {},
-        'timestamp': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+        'timestamp': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
+        'dns': dns_record
     }
 
     # SSL Check
@@ -370,7 +377,7 @@ def health_check(url, min_ssl_days=10):
         logger_main.error("Total Download Time: Error")
 
     # Log the JSON report using the healthCheck logger
-    json_report = json.dumps(report)
+    json_report = json.dumps(report, cls=DateTimeEncoder)
     logger_health.info(json_report)
 
     return report
@@ -613,8 +620,6 @@ def get_domain_registration_info(domain: str) -> dict[str, any]:
             'error': str(e)
         }
 
-
-
 if __name__ == "__main__":
     # Configure logging
     # configure_logger()
@@ -631,7 +636,20 @@ if __name__ == "__main__":
         sys.exit(1)
 
     for site in sites_to_check:
-        health_check(site.url, site.min_ssl_days)
+        logger_main.info("\nProcessing URL %s", site.url)
         dns_info = extract_dns_info(site.url)
-        print(list_all_dns_records(dns_info['domain']))
-        print(get_domain_registration_info(dns_info['domain']))
+        domain = dns_info['domain']
+        dns_records = list_all_dns_records(domain)
+        domain_registration_info = get_domain_registration_info(domain)
+        dns_info.update(
+            {
+                'dns_records' : dns_records,
+                'domain_registration_info': domain_registration_info
+            }
+        )
+
+        health_check_info = health_check(
+            url=site.url,
+            dns_record=dns_info,
+            min_ssl_days=site.min_ssl_days
+        )
