@@ -16,6 +16,7 @@ from urllib.parse import urlparse
 import dns.resolver
 import requests
 from core.logger import LoggerConfigurator
+import whois
 
 
 @dataclass
@@ -258,7 +259,6 @@ def measure_total_download_time(url):
 
         return None
 
-
 def health_check(url, min_ssl_days=10):
     """
     Performs a comprehensive health check on the given URL, including SSL certificate validation,
@@ -375,7 +375,6 @@ def health_check(url, min_ssl_days=10):
 
     return report
 
-
 def load_sites_from_config(config_file: str = 'sites.ini') -> List[SiteConfig]:
     """
     Loads site configurations from an INI-style configuration file and returns a list
@@ -487,6 +486,134 @@ def load_sites_from_config(config_file: str = 'sites.ini') -> List[SiteConfig]:
 
     return sites
 
+def extract_dns_info(url: str) -> dict[str, List[str]]:
+    """
+    Extracts basic DNS information (IP addresses) from the given URL.
+
+    Args:
+        url (str): The URL of the website.
+
+    Returns:
+        Dict[str, List[str]]: A dictionary containing DNS information with the following keys:
+            - 'domain': The domain extracted from the URL.
+            - 'resolved_ips': A list of resolved IP addresses.
+            - 'error': An error message, if DNS resolution fails.
+    """
+    parsed_url = urlparse(url)
+    domain = parsed_url.netloc or parsed_url.path  # Extract domain from the URL
+
+    try:
+        # Resolve the domain to its associated IP addresses
+        resolved_ips = socket.gethostbyname_ex(domain)[2]
+        return {
+            'domain': domain,
+            'resolved_ips': resolved_ips,
+            'error': None
+        }
+    except socket.gaierror as e:
+        # Handle DNS resolution failure
+        return {
+            'domain': domain,
+            'resolved_ips': [],
+            'error': str(e)
+        }
+
+def list_all_dns_records(domain: str) -> dict[str, List[str]]:
+    """
+    Lists all DNS records (A, MX, NS, CNAME, TXT, and other available records) associated with the domain.
+
+    Args:
+        domain (str): The domain to query DNS records for.
+
+    Returns:
+        Dict[str, List[str]]: A dictionary where the keys are the DNS record types (e.g., 'A', 'MX', 'TXT')
+                              and the values are lists of corresponding records.
+    """
+    dns_records = {}
+
+    # Loop through all DNS record types available in dnspython's rdatatype
+    for record_type in dns.rdatatype.RdataType:
+        try:
+            # Get the name of the record type
+            record_type_name = dns.rdatatype.to_text(record_type)
+            
+            # Try resolving this record type for the domain
+            answers = dns.resolver.resolve(domain, record_type_name)
+            dns_records[record_type_name] = [str(rdata) for rdata in answers]
+        
+        except dns.resolver.NoAnswer:
+            # No records of this type found
+            dns_records[record_type_name] = []
+        
+        except dns.resolver.NXDOMAIN:
+            # Domain does not exist
+            return {'error': f"Domain {domain} does not exist"}
+        
+        except dns.resolver.NoMetaqueries:
+            # Some record types like ANY, AXFR, etc., can't be queried.
+            dns_records[record_type_name] = ["Not supported for querying"]
+        
+        except dns.exception.Timeout:
+            # Timeout during the DNS query
+            dns_records[record_type_name] = ["Timeout querying this record type"]
+        
+        except Exception as e:
+            # Catch all other errors, including unsupported record types
+            dns_records[record_type_name] = [f"Error: {str(e)}"]
+
+    return dns_records
+
+def get_domain_registration_info(domain: str) -> dict[str, any]:
+    """
+    Retrieves domain registration and expiration information using WHOIS lookup.
+
+    Args:
+        domain (str): The domain to query WHOIS information for.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the registration and expiration dates, including:
+            - 'domain': The domain name.
+            - 'registrar': The registrar of the domain.
+            - 'registration_date': The date the domain was registered.
+            - 'expiration_date': The date the domain is set to expire.
+            - 'updated_date': The last date when the domain information was updated.
+            - 'error': An error message, if WHOIS lookup fails.
+    """
+    try:
+        w = whois.whois(domain)
+        
+        # Extract the relevant information
+        registration_info = {
+            'domain': w.domain_name,
+            'registrar': w.registrar,
+            'registration_date': w.creation_date,
+            'expiration_date': w.expiration_date,
+            'updated_date': w.updated_date,
+            'error': None
+        }
+
+        # Handle multiple dates (sometimes WHOIS returns a list of dates)
+        if isinstance(registration_info['registration_date'], list):
+            registration_info['registration_date'] = registration_info['registration_date'][0]
+        if isinstance(registration_info['expiration_date'], list):
+            registration_info['expiration_date'] = registration_info['expiration_date'][0]
+        if isinstance(registration_info['updated_date'], list):
+            registration_info['updated_date'] = registration_info['updated_date'][0]
+
+        return registration_info
+
+    except Exception as e:
+        # Handle errors such as domain not found or whois query issues
+        return {
+            'domain': domain,
+            'registrar': None,
+            'registration_date': None,
+            'expiration_date': None,
+            'updated_date': None,
+            'error': str(e)
+        }
+
+
 
 if __name__ == "__main__":
     # Configure logging
@@ -504,5 +631,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     for site in sites_to_check:
-        print(site)
         health_check(site.url, site.min_ssl_days)
+        dns_info = extract_dns_info(site.url)
+        print(list_all_dns_records(dns_info['domain']))
+        print(get_domain_registration_info(dns_info['domain']))
