@@ -65,14 +65,14 @@ Please wait for further updates.
 
 - **SSL Certificate Validation**
   - Checks if the SSL certificate is valid and matches the hostname.
-  - Verifies that the SSL certificate has at least a minimum number of days before expiration (default is 10 days).
+  - Verifies that the SSL certificate has at least a minimum of days before expiration (default is 10 days).
 
 - **DNS Resolution Time**
   - Measures the time it takes to resolve a domain to an IP address via DNS.
   - Retrieves all resolved IP addresses.
 
 - **Time to First Byte (TTFB)**
-  - Calculates the time it takes to receive the first byte of data after making a request to the server.
+  - Calculates the time it takes to receive the first data byte after requesting the server.
 
 - **Total Download Time**
   - Measures the total time taken to download the entire static content of the web page.
@@ -127,7 +127,7 @@ make install
 
 ### Output
 
-The script will output a detailed health check report for the specified URL, including:
+The script will output a detailed health check report for the specified URL, including the following:
 
 - **SSL Certificate**
   - Validity status
@@ -192,8 +192,6 @@ For production use, consider adding robust error handling to manage exceptions s
 - **Reporting**: Export the health check report to a file (e.g., JSON, CSV) for further analysis.
 
 ## ToDo
-Consider refactor it into Elastic Beat or data provider for Prometheus and Grafana 
+Consider refactoring it into Elastic Beat or a data provider for Prometheus and Grafana. 
 
-## Refactoring into an Elastic Beat
 
-To integrate this tool into the Elastic Stack (ELK Stack) as a custom Beat, you can consider the following approaches:
