@@ -144,24 +144,159 @@ The script will output a detailed health check report for the specified URL, inc
 - **Summary**
 ```
 {
-    "url": "https://www.example.com",
-    "domain": "www.example.com",
-    "ssl_check": {
-        "valid": true,
-        "days_until_expiration": 154,
-        "expiry_date": "2025-03-01 23:59:59"
+  "url": "https://example.com",
+  "domain": "example.com",
+  "ssl_check": {
+    "valid": true,
+    "days_until_expiration": 96,
+    "expiry_date": "2025-03-01 23:59:59"
+  },
+  "dns_check": {
+    "resolution_time_ms": 3.998994827270508,
+    "resolved_ips": [
+      "93.184.215.14"
+    ]
+  },
+  "performance": {
+    "ttfb_ms": 480.556,
+    "total_download_time_ms": 361.16957664489746
+  },
+  "timestamp": "2024-11-25 21:15:08",
+  "dns": {
+    "domain": "example.com",
+    "resolved_ips": [
+      "93.184.215.14"
+    ],
+    "error": null,
+    "dns_records": {
+      "TYPE0": [],
+      "A": [
+        "93.184.215.14"
+      ],
+      "NS": [
+        "a.iana-servers.net.",
+        "b.iana-servers.net."
+      ],
+      "MD": [],
+      "MF": [],
+      "CNAME": [],
+      "SOA": [
+        "ns.icann.org. noc.dns.icann.org. 2024081457 7200 3600 1209600 3600"
+      ],
+      "MB": [],
+      "MG": [],
+      "MR": [],
+      "NULL": [],
+      "WKS": [],
+      "PTR": [],
+      "HINFO": [],
+      "MINFO": [],
+      "MX": [
+        "0 ."
+      ],
+      "TXT": [
+        "\"v=spf1 -all\"",
+        "\"wgyf8z8cgvm2qmxpnbnldrcltvk4xqfn\""
+      ],
+      "RP": [],
+      "AFSDB": [],
+      "X25": [],
+      "ISDN": [],
+      "RT": [],
+      "NSAP": [],
+      "NSAP-PTR": [],
+      "SIG": [],
+      "KEY": [],
+      "PX": [],
+      "GPOS": [],
+      "AAAA": [
+        "2606:2800:21f:cb07:6820:80da:af6b:8b2c"
+      ],
+      "LOC": [],
+      "NXT": [],
+      "SRV": [],
+      "NAPTR": [],
+      "KX": [],
+      "CERT": [],
+      "A6": [],
+      "DNAME": [],
+      "OPT": [
+        "Not supported for querying"
+      ],
+      "APL": [],
+      "DS": [
+        "370 13 2 be74359954660069d5c63d200c39f5603827d7dd02b56f120ee9f3a86764247c"
+      ],
+      "SSHFP": [],
+      "IPSECKEY": [],
+      "RRSIG": [],
+      "NSEC": [],
+      "DNSKEY": [
+        "256 3 13 OtuN/SL9sE+SDQ0tOLeezr1KzUNi77Ff lTjxQylUhm3V7m13Vz9tYQucSGK0pyxI So9CQsszubAwJSypq3li3g==",
+        "256 3 13 ai2pvpijJjeNTpBu4yg6T375JqIStPtL ABDTAILb+f4J7XpofUNXGQn6FpQvZ6CA RWn2xQapbjGtDRjTf4qYxg==",
+        "257 3 13 kXKkvWU3vGYfTJGl3qBd4qhiWp5aRs7Y tkCJxD2d+t7KXqwahww5IgJtxJT2yFIt lggazyfXqJEVOmMJ3qT0tQ=="
+      ],
+      "DHCID": [],
+      "NSEC3": [],
+      "NSEC3PARAM": [
+        "1 0 5 6a603f21393e8811"
+      ],
+      "TLSA": [],
+      "SMIMEA": [],
+      "HIP": [],
+      "NINFO": [],
+      "CDS": [],
+      "CDNSKEY": [],
+      "OPENPGPKEY": [],
+      "CSYNC": [],
+      "ZONEMD": [],
+      "SVCB": [],
+      "HTTPS": [],
+      "SPF": [],
+      "UNSPEC": [],
+      "NID": [],
+      "L32": [],
+      "L64": [],
+      "LP": [],
+      "EUI48": [],
+      "EUI64": [],
+      "TKEY": [
+        "Not supported for querying"
+      ],
+      "TSIG": [
+        "Not supported for querying"
+      ],
+      "IXFR": [
+        "Not supported for querying"
+      ],
+      "AXFR": [
+        "Not supported for querying"
+      ],
+      "MAILB": [
+        "Not supported for querying"
+      ],
+      "MAILA": [
+        "Not supported for querying"
+      ],
+      "ANY": [
+        "Not supported for querying"
+      ],
+      "URI": [],
+      "CAA": [],
+      "AVC": [],
+      "AMTRELAY": [],
+      "TA": [],
+      "DLV": []
     },
-    "dns_check": {
-        "resolution_time_ms": 2.5107860565185547,
-        "resolved_ips": [
-            "93.184.215.14"
-        ]
-    },
-    "performance": {
-        "ttfb_ms": 430.05100000000004,
-        "total_download_time_ms": 397.6855278015137
-    },
-    "timestamp": "2024-09-28 21:34:14"
+    "domain_registration_info": {
+      "domain": "EXAMPLE.COM",
+      "registrar": "RESERVED-Internet Assigned Numbers Authority",
+      "registration_date": "1995-08-14T04:00:00",
+      "expiration_date": "2025-08-13T04:00:00",
+      "updated_date": "2024-08-14T07:01:34",
+      "error": null
+    }
+  }
 }
 
 ```
